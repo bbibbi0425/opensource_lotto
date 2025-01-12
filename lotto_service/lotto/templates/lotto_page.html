@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lotto Ticket Purchase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f9fc;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1, h2 {
+            color: #0078d7;
+        }
+        .section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #0078d7;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #005bb5;
+        }
+        p {
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        ul li {
+            background: #e7f3ff;
+            padding: 10px;
+            border: 1px solid #0078d7;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Buy Lotto Ticket</h1>
+    <div class="section">
+        <form id="lotto-form" method="post">
+            {% csrf_token %}
+            <label for="user">User Name:</label>
+            <input type="text" id="user" name="user" required>
+
+            <label for="numbers">Enter Numbers (Comma Separated):</label>
+            <input type="text" id="numbers" name="numbers" placeholder="e.g., 1,2,3,4,5,6">
+
+            <button type="submit">Buy Ticket</button>
+            <button type="button" id="auto-generate">Auto Generate Numbers</button>
+        </form>
+        <p id="result-ticket" style="color: black; font-size: 20px;"></p>
+    </div>
+
+    <h1>Check Lotto Results</h1>
+    <div class="section">
+        <label for="round-select">Select Round:</label>
+        <select id="round-select">
+            {% for draw in draws %}
+            <option value="{{ draw.round_number }}">Round {{ draw.round_number }}</option>
+            {% endfor %}
+        </select>
+        <button id="check-results">Check Results</button>
+
+        <p id="result-message" style="color: black; font-size: 20px;"></p>
+        <p id="error-message" style="color: red;"></p>
+        <ul id="results-list"></ul>
+    </div>
+
+    <script>
+        // JavaScript logic
+        document.getElementById("auto-generate").addEventListener("click", () => {
+            const numbers = Array.from({ length: 6 }, () => Math.floor(Math.random() * 45) + 1);
+            document.getElementById("numbers").value = numbers.join(",");
+        });
+
+        document.getElementById("lotto-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+
+            try {
+                const response = await fetch("", { method: "POST", body: formData });
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById("result-ticket").innerHTML = `Ticket purchased successfully! <br> Your numbers: <strong><span style="color: green;">${data.numbers.join(", ")}</span></strong>`;
+
+                    document.getElementById("error-message").innerText = "";
+                } else {
+                    document.getElementById("result-message").innerText = "";
+                    document.getElementById("error-message").innerText = data.error;
+                }
+            } catch (error) {
+                document.getElementById("result-message").innerText = "";
+                document.getElementById("error-message").innerText = "An error occurred. Please try again.";
+            }
+        });
+
+        document.getElementById("check-results").addEventListener("click", async () => {
+            const round = document.getElementById("round-select").value;
+
+            try {
+                const response = await fetch(`?action=check_results&round=${round}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    const resultsList = document.getElementById("results-list");
+                    resultsList.innerHTML = "";
+
+                    data.results.forEach(result => {
+                        const listItem = document.createElement("li");
+                        listItem.innerText = `User: ${result.user}, Numbers: ${result.numbers}, Rank: ${result.rank}`;
+                        resultsList.appendChild(listItem);
+                    });
+
+                    document.getElementById("result-message").innerHTML = `[Round ${data.round}] <br> Winning Numbers: <strong><span style="color: green;">${data.winning_numbers}</span></strong> <br> Bonus: <strong><span style="color: green;">${data.bonus_number}<span><strong>`;
+                    document.getElementById("error-message").innerText = "";
+                } else {
+                    document.getElementById("result-message").innerText = "";
+                    document.getElementById("error-message").innerText = data.error;
+                }
+            } catch (error) {
+                document.getElementById("result-message").innerText = "";
+                document.getElementById("error-message").innerText = "An error occurred while fetching results.";
+            }
+        });
+    </script>
+</body>
+</html>
