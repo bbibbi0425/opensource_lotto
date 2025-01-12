@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", function () {
         winningNumbersField.value = winningNumbers.join(",");
         bonusNumberField.value = bonusNumber;
 
-        calculateWinnerStatistics(); // 버튼 클릭 후 통계 업데이트
+        calculateWinnerStatistics();
     });
 
     // 버튼과 통계 출력 영역을 필드셋의 끝에 추가

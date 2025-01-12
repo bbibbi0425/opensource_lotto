@@ -118,9 +118,13 @@ USE_TZ = True
 
 STATIC_URL = '/static/'  # 정적 파일 URL
 STATICFILES_DIRS = [BASE_DIR / "static"]  # 사용자 정의 정적 파일 경로
-STATIC_ROOT = BASE_DIR / "staticfiles"  # collectstatic 명령어로 모을 경로
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # collectstatic 명령어로 모을 경로
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # 기본 인증 백엔드
+]

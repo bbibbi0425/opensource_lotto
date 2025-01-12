@@ -9,6 +9,9 @@ class Draw(models.Model):
     bonus_number = models.IntegerField(blank=True, null=True, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        db_table = 'lotto_draw'  # 테이블 이름 명시
+
     def get_winner_statistics(self):
         """
         회차별 당첨자 수를 반환하는 메서드.
